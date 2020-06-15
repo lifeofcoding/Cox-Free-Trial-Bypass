@@ -5,6 +5,22 @@ const random_useragent = require("random-useragent");
 const fs = require("fs");
 const path = require("path");
 
+const domains = [
+  "@gmail.com",
+  "@yahoo.com",
+  "@outlook.com",
+  "@live.com",
+  "@aol.com",
+];
+
+const emailMixer = (firstName, lastName) => {
+  var rand = rand(0, 1);
+
+  let first = rand ? firstName + "." + lastName : lastName + "." + firstName;
+
+  return `${first}@${domains[Math.floor(Math.random() * domains.length)]}`;
+};
+
 (async function run() {
   const name = random_name();
   const firstName = name.split(" ")[0];
@@ -74,12 +90,7 @@ const path = require("path");
         return window.navigator.userAgent;
       })();
     });
-
-    var url = await page.evaluate(() => {
-      return (function () {
-        return window.location.href;
-      })();
-    });
+    console.log("Using usere-agent:", userAgent);
 
     await page.setViewport({ width: 1440, height: 779 });
 
@@ -87,11 +98,11 @@ const path = require("path");
     await page.click("table #trial_request_voucher_form_firstName");
 
     await page.type("table #trial_request_voucher_form_firstName", firstName, {
-      delay: 200,
+      delay: rand(100, 300),
     });
 
     await page.type("table #trial_request_voucher_form_lastName", lastName, {
-      delay: 200,
+      delay: rand(100, 300),
     });
 
     await page.waitForSelector("table #trial_request_voucher_form_isp");
@@ -104,7 +115,7 @@ const path = require("path");
 
     await page.type(
       "table #trial_request_voucher_form_email",
-      `${lastName}.${firstName}@gmail.com`,
+      emailMixer(firstName, lastName),
       {
         delay: 200,
       }
