@@ -16,19 +16,19 @@
 # To identify your WiFi adapter use the command ifconfig or ip adddr
 # If it is to be something other than wlan0, 
 # modify the code to the name of your WiFi adapter.
-
+local iface=$1
 #Check current MAC address settings using macchanger
-macchanger -s wlan1
+macchanger -s "${iface}"
 #Stop the network manager service
 sudo service network-manager stop
 #Bring down wlan0 
-sudo ifconfig wlan1 down
+sudo ifconfig "${iface}" down
 #Assign new random MAC address
-sudo macchanger -a wlan1
+sudo macchanger -a "${iface}"
 #Check that macchanger indeed spoofed the MAC address
-macchanger -s wlan1
+macchanger -s "${iface}"
 #Bring adapter back up
-sudo ifconfig wlan1 up
+sudo ifconfig "${iface}" up
 #Bring network manager service back up
 sudo service network-manager start
 
