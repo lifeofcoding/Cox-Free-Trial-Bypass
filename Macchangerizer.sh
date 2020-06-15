@@ -16,7 +16,7 @@
 # To identify your WiFi adapter use the command ifconfig or ip adddr
 # If it is to be something other than wlan0, 
 # modify the code to the name of your WiFi adapter.
-local iface=$1
+iface=$1
 #Check current MAC address settings using macchanger
 macchanger -s "${iface}"
 #Stop the network manager service
