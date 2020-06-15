@@ -5,18 +5,22 @@ const random_useragent = require("random-useragent");
 const fs = require("fs");
 const path = require("path");
 
+const rand = (min, max) => {
+  return Math.floor(Math.random() * max);
+};
+
 const domains = [
-  "@gmail.com",
-  "@yahoo.com",
-  "@outlook.com",
-  "@live.com",
-  "@aol.com",
+  "gmail.com",
+  "yahoo.com",
+  "outlook.com",
+  "live.com",
+  "aol.com",
 ];
 
 const emailMixer = (firstName, lastName) => {
-  var rand = rand(0, 1);
-
-  let first = rand ? firstName + "." + lastName : lastName + "." + firstName;
+  let first = rand(0, 1)
+    ? firstName + "." + lastName
+    : lastName + "." + firstName;
 
   return `${first}@${domains[Math.floor(Math.random() * domains.length)]}`;
 };
@@ -137,19 +141,36 @@ const emailMixer = (firstName, lastName) => {
 
     await page.waitForNavigation({ timeout: 90000 });
 
-    const data = await page.evaluate(
-      () => document.querySelector("*").outerHTML
-    );
-
-    if (data.includes("Thank you")) {
-      console.log("Wifi Connected Successfully");
-    }
-
-    await page.screenshot({
-      path: path.resolve(__dirname) + "/result.jpeg",
-      type: "jpeg",
-      quality: 100,
+    var pageText = await page.evaluate(() => {
+      return (function () {
+        var s = window.getSelection();
+        s.removeAllRanges();
+        var r = document.createRange();
+        r.selectNode(document.body);
+        s.addRange(r);
+        var c = s.toString();
+        s.removeAllRanges();
+        return c;
+      })();
     });
+
+    if (pageText.toLowerCase().includes("you are now connected")) {
+      let t = new Date().toLocaleString();
+
+      console.log("Wifi Connected Successfully", t);
+
+      await page.screenshot({
+        path: path.resolve(__dirname) + "/result.jpeg",
+        type: "jpeg",
+        quality: 100,
+      });
+    } else {
+      await page.screenshot({
+        path: path.resolve(__dirname) + "/error-result.jpeg",
+        type: "jpeg",
+        quality: 100,
+      });
+    }
 
     await browser.close();
 
