@@ -5,6 +5,7 @@ const random_useragent = require("random-useragent");
 const fs = require("fs");
 const path = require("path");
 const randomMac = require("random-mac");
+const notifier = require("node-notifier");
 const argv = require("yargs")
   .option("iface", {
     alias: "i",
@@ -70,6 +71,11 @@ const emailMixer = (firstName, lastName) => {
   sh.exec(
     `bash ./Macchangerizer.sh ${argv.iface} && sleep 10`,
     async (code, output) => {
+      notifier.notify({
+        title: "Cox Wifi Connecting",
+        message: "Attempting to connect to Cox Wifi Trial Wifi...",
+      });
+
       var macParts = output.match(/(?<=New MAC:       \s*).*?(?=\s* )/gs);
 
       const mac = macParts[0];
@@ -208,6 +214,12 @@ const emailMixer = (firstName, lastName) => {
           let t = new Date().toLocaleString();
 
           console.log("Wifi Connected Successfully", t);
+
+          notifier.notify({
+            title: "Cox Wifi Connected",
+            message: "Wifi Connected Successfully",
+          });
+
           if (argv.debug) {
             await page.screenshot({
               path: path.resolve(__dirname) + "/result.jpeg",
@@ -220,6 +232,8 @@ const emailMixer = (firstName, lastName) => {
               path.resolve(__dirname) + "/result.jpeg"
             );
           }
+
+          setTimeout(run, 60000 * 60);
         } else {
           await page.screenshot({
             path: path.resolve(__dirname) + "/error-result.jpeg",
@@ -231,14 +245,17 @@ const emailMixer = (firstName, lastName) => {
             "[DEBUG]: Error screenshot: ",
             path.resolve(__dirname) + "/error-result.jpeg"
           );
+
+          notifier.notify({
+            title: "Error",
+            message: "Error, Cox Wifi failed to connect, please check output.",
+          });
         }
 
         await browser.close();
-
-        setTimeout(run, 60000 * 60);
       } catch (err) {
         console.warn("Error: ", err);
-        run();
+        setTimeout(run, 30000);
       }
     }
   );
