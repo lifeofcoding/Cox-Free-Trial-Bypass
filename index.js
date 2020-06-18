@@ -6,6 +6,9 @@ const fs = require("fs");
 const path = require("path");
 const randomMac = require("random-mac");
 const notifier = require("node-notifier");
+const util = require("util");
+const dns = require("dns");
+const wifi = require("node-wifi");
 const argv = require("yargs")
   .option("iface", {
     alias: "i",
@@ -32,6 +35,34 @@ const cmd = `
   sudo ifconfig "${argv.iface}" up && \
   sudo service network-manager start
 `;
+
+async function isConnected() {
+  try {
+    const lookupService = util.promisify(dns.lookupService);
+    const result = await lookupService("8.8.8.8", 53);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+function waitTillOnline() {
+  var check = async function (cb) {
+    const isReallyConnected = await isConnected();
+
+    if (!isReallyConnected) {
+      setTimeout(check.bind(this, cb), 100);
+    } else {
+      cb();
+    }
+  };
+
+  return new Promise(function (resolve, reject) {
+    check(function () {
+      resolve();
+    });
+  });
+}
 
 const rand = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -85,11 +116,15 @@ const emailMixer = (firstName, lastName) => {
       message: "Attempting to connect to Cox Wifi.",
     });
 
+    wifi.init({
+      iface: argv.iface,
+    });
+
+    await waitTillOnline();
+
     var macParts = output.match(/(?<=New MAC:       \s*).*?(?=\s* )/gs);
 
     const mac = macParts[0];
-
-    await new Promise((r) => setTimeout(r, argv.timeout));
 
     const browser = await puppeteer.launch(options);
 

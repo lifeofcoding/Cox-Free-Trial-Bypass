@@ -11,6 +11,7 @@
   "dependencies": {
     "node-notifier": "^7.0.1",
     "node-random-name": "^1.0.1",
+    "node-wifi": "^2.0.12",
     "puppeteer": "^3.3.0",
     "random-mac": "0.0.5",
     "random-useragent": "^0.3.1",
