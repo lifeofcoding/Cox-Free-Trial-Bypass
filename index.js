@@ -33,7 +33,8 @@ const cmd = `
   sudo macchanger -a "${argv.iface}" && \
   macchanger -s "${argv.iface}" && \
   sudo ifconfig "${argv.iface}" up && \
-  sudo service network-manager start
+  sudo service network-manager start && \
+  sleep 5
 `;
 
 async function isConnected() {
@@ -114,10 +115,6 @@ const emailMixer = (firstName, lastName) => {
       icon: path.join(__dirname, "wifi.png"),
       title: "Cox Wifi Connecting...",
       message: "Attempting to connect to Cox Wifi.",
-    });
-
-    wifi.init({
-      iface: argv.iface,
     });
 
     await waitTillOnline();
