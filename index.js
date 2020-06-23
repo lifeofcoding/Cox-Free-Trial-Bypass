@@ -39,8 +39,8 @@ const cmd = `
 
 async function isConnected() {
   try {
-    const lookupService = util.promisify(dns.lookupService);
-    const result = await lookupService("8.8.8.8", 53);
+    let lookupService = util.promisify(dns.lookupService);
+    let result = await lookupService("8.8.8.8", 53);
     return true;
   } catch (err) {
     return false;
@@ -48,16 +48,25 @@ async function isConnected() {
 }
 
 function waitTillOnline() {
+  var tried = 0;
   var check = async function (cb) {
-    const isReallyConnected = await isConnected();
+    let isReallyConnected = await isConnected();
 
-    if (!isReallyConnected) {
-      setTimeout(check.bind(this, cb), 100);
+    if (tried < 30 && !isReallyConnected) {
+      ++tried;
+      process.stdout.write(`${tried}\r`);
+      setTimeout(check.bind(this, cb), 1000);
+    } else if (tried >= 30) {
+      console.log("[DEBUG] Waited over a min, attempting to continue anyways");
+      cb();
     } else {
       cb();
     }
   };
 
+  if (argv.debug) {
+    console.log("[DEBUG] Waiting till online...");
+  }
   return new Promise(function (resolve, reject) {
     check(function () {
       resolve();
@@ -118,6 +127,10 @@ const emailMixer = (firstName, lastName) => {
     });
 
     await waitTillOnline();
+
+    if (argv.debug) {
+      console.log("[DEBUG] Online! Continuing...");
+    }
 
     var macParts = output.match(/(?<=New MAC:       \s*).*?(?=\s* )/gs);
 
