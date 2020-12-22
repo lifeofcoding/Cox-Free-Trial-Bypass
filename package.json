@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "node-notifier": "^7.0.1",
+    "node-notifier": "^8.0.1",
     "node-random-name": "^1.0.1",
     "node-wifi": "^2.0.12",
     "puppeteer": "^3.3.0",
